@@ -12,10 +12,18 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
   const [category, setCategory] = useState<Category>(Category.TASKA);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    setItems(storage.getGallery());
+    loadGallery();
   }, []);
+
+  const loadGallery = async () => {
+    setIsLoading(true);
+    const galleryItems = await storage.getGallery();
+    setItems(galleryItems);
+    setIsLoading(false);
+  };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -30,20 +38,17 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
     setIsUploading(true);
 
     try {
+      const storageId = `${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
       const newItem = {
-        id: `${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        id: storageId,
         category,
         title,
         date: Date.now(),
       };
 
-      // Upload to Firebase and get full item with URL
       await storage.addItem(newItem, imageFile);
+      await loadGallery();
       
-      // Refresh gallery
-      setItems(storage.getGallery());
-      
-      // Reset form
       setTitle('');
       setImageFile(null);
       setIsUploading(false);
@@ -57,11 +62,11 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
     }
   };
 
-  const handleDelete = async (id: string) => {
+  const handleDelete = async (firestoreId: string, storageId: string) => {
     if (confirm('Opravdu chcete tuto fotografii smazat?')) {
       try {
-        await storage.removeItem(id);
-        setItems(storage.getGallery());
+        await storage.removeItem(firestoreId, storageId);
+        await loadGallery();
         alert('Fotografie byla smazána');
       } catch (error) {
         console.error('Delete error:', error);
@@ -150,26 +155,30 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
 
       <div className="space-y-4">
         <h3 className="text-xl font-bold text-slate-800 mb-6">Správa nahraných fotografií</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {items.map(item => (
-            <div key={item.id} className="flex items-center space-x-4 bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
-              <img src={item.url} alt={item.title} className="w-20 h-20 object-cover rounded-lg" />
-              <div className="flex-1">
-                <h4 className="font-bold text-slate-800 truncate">{item.title}</h4>
-                <p className="text-xs text-slate-500">{item.category}</p>
+        {isLoading ? (
+          <div className="text-center py-12 text-slate-400">Načítám...</div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {items.map(item => (
+              <div key={item.id} className="flex items-center space-x-4 bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+                <img src={item.url} alt={item.title} className="w-20 h-20 object-cover rounded-lg" />
+                <div className="flex-1">
+                  <h4 className="font-bold text-slate-800 truncate">{item.title}</h4>
+                  <p className="text-xs text-slate-500">{item.category}</p>
+                </div>
+                <button
+                  onClick={() => handleDelete(item.id, item.id)}
+                  className="p-2 text-rose-500 hover:bg-rose-50 rounded-lg transition-colors"
+                  title="Smazat"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                  </svg>
+                </button>
               </div>
-              <button
-                onClick={() => handleDelete(item.id)}
-                className="p-2 text-rose-500 hover:bg-rose-50 rounded-lg transition-colors"
-                title="Smazat"
-              >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                </svg>
-              </button>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

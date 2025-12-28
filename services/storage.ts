@@ -1,46 +1,46 @@
 import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
-import { storage as firebaseStorage } from '../firebase';
+import { collection, addDoc, getDocs, deleteDoc, doc, query, orderBy } from 'firebase/firestore';
+import { storage as firebaseStorage, db } from '../firebase';
 import { GalleryItem } from '../types';
 
-const STORAGE_KEY = 'zeman_gallery_metadata';
-
-// Helper to store metadata in localStorage (just IDs and metadata, not images)
-const saveMetadata = (items: GalleryItem[]) => {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
-};
-
-const getMetadata = (): GalleryItem[] => {
-  const data = localStorage.getItem(STORAGE_KEY);
-  return data ? JSON.parse(data) : [];
-};
+const GALLERY_COLLECTION = 'gallery';
 
 export const storage = {
-  // Get all gallery items
-  getGallery: (): GalleryItem[] => {
-    return getMetadata();
+  // Get all gallery items from Firestore
+  getGallery: async (): Promise<GalleryItem[]> => {
+    try {
+      const q = query(collection(db, GALLERY_COLLECTION), orderBy('date', 'desc'));
+      const querySnapshot = await getDocs(q);
+      const items: GalleryItem[] = [];
+      
+      querySnapshot.forEach((doc) => {
+        items.push({ ...doc.data(), id: doc.id } as GalleryItem);
+      });
+      
+      return items;
+    } catch (error) {
+      console.error('Error loading gallery:', error);
+      return [];
+    }
   },
 
   // Add new item with Firebase upload
   addItem: async (item: Omit<GalleryItem, 'url'>, file: File): Promise<GalleryItem> => {
     try {
-      // Create reference in Firebase Storage
+      // Upload to Firebase Storage
       const storageRef = ref(firebaseStorage, `gallery/${item.id}`);
-      
-      // Upload file
       await uploadBytes(storageRef, file);
-      
-      // Get download URL
       const url = await getDownloadURL(storageRef);
       
-      // Create full item with URL
-      const fullItem: GalleryItem = { ...item, url };
+      // Save metadata to Firestore
+      const fullItem: Omit<GalleryItem, 'id'> = { 
+        ...item, 
+        url 
+      };
       
-      // Save metadata
-      const items = getMetadata();
-      const newItems = [fullItem, ...items];
-      saveMetadata(newItems);
+      const docRef = await addDoc(collection(db, GALLERY_COLLECTION), fullItem);
       
-      return fullItem;
+      return { ...fullItem, id: docRef.id };
     } catch (error) {
       console.error('Error uploading to Firebase:', error);
       throw error;
@@ -48,24 +48,17 @@ export const storage = {
   },
 
   // Remove item
-  removeItem: async (id: string): Promise<void> => {
+  removeItem: async (id: string, storageId: string): Promise<void> => {
     try {
       // Delete from Firebase Storage
-      const storageRef = ref(firebaseStorage, `gallery/${id}`);
+      const storageRef = ref(firebaseStorage, `gallery/${storageId}`);
       await deleteObject(storageRef);
       
-      // Remove from metadata
-      const items = getMetadata();
-      const newItems = items.filter(i => i.id !== id);
-      saveMetadata(newItems);
+      // Delete from Firestore
+      await deleteDoc(doc(db, GALLERY_COLLECTION, id));
     } catch (error) {
       console.error('Error deleting from Firebase:', error);
       throw error;
     }
-  },
-
-  // Save gallery (for compatibility)
-  saveGallery: (items: GalleryItem[]): void => {
-    saveMetadata(items);
   }
 };

@@ -9,10 +9,18 @@ const Gallery: React.FC = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [touchStart, setTouchStart] = useState(0);
   const [touchEnd, setTouchEnd] = useState(0);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    setItems(storage.getGallery());
+    loadGallery();
   }, []);
+
+  const loadGallery = async () => {
+    setIsLoading(true);
+    const galleryItems = await storage.getGallery();
+    setItems(galleryItems);
+    setIsLoading(false);
+  };
 
   const filteredItems = filter === 'Vše' 
     ? items 
@@ -23,7 +31,7 @@ const Gallery: React.FC = () => {
   const openLightbox = (index: number) => {
     setCurrentIndex(index);
     setLightboxOpen(true);
-    document.body.style.overflow = 'hidden'; // Prevent scroll
+    document.body.style.overflow = 'hidden';
   };
 
   const closeLightbox = () => {
@@ -39,7 +47,6 @@ const Gallery: React.FC = () => {
     setCurrentIndex((prev) => (prev - 1 + filteredItems.length) % filteredItems.length);
   };
 
-  // Touch handlers for mobile swipe
   const handleTouchStart = (e: React.TouchEvent) => {
     setTouchStart(e.targetTouches[0].clientX);
   };
@@ -52,20 +59,16 @@ const Gallery: React.FC = () => {
     if (!touchStart || !touchEnd) return;
     
     if (touchStart - touchEnd > 50) {
-      // Swiped left
       nextImage();
     }
     if (touchStart - touchEnd < -50) {
-      // Swiped right
       prevImage();
     }
     
-    // Reset
     setTouchStart(0);
     setTouchEnd(0);
   };
 
-  // Keyboard navigation
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (!lightboxOpen) return;
@@ -85,7 +88,6 @@ const Gallery: React.FC = () => {
         <div className="w-20 h-1 bg-amber-600 mx-auto"></div>
       </div>
 
-      {/* Category filters - horizontal scroll on mobile */}
       <div className="mb-12 overflow-x-auto pb-2 -mx-4 px-4">
         <div className="flex gap-3 justify-center min-w-max md:min-w-0">
           {categories.map((cat) => (
@@ -104,41 +106,45 @@ const Gallery: React.FC = () => {
         </div>
       </div>
 
-      {/* Gallery grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
-        {filteredItems.map((item, index) => (
-          <div 
-            key={item.id} 
-            className="group bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 cursor-pointer active:scale-95"
-            onClick={() => openLightbox(index)}
-          >
-            <div className="relative aspect-[4/3] overflow-hidden">
-              <img
-                src={item.url}
-                alt={item.title}
-                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-              />
-              <div className="absolute top-3 left-3">
-                <span className="bg-amber-700/90 text-white px-3 py-1 text-xs rounded-full backdrop-blur-sm font-medium">
-                  {item.category}
-                </span>
+      {isLoading ? (
+        <div className="text-center py-20 text-slate-400">Načítám galerii...</div>
+      ) : (
+        <>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
+            {filteredItems.map((item, index) => (
+              <div 
+                key={item.id} 
+                className="group bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 cursor-pointer active:scale-95"
+                onClick={() => openLightbox(index)}
+              >
+                <div className="relative aspect-[4/3] overflow-hidden">
+                  <img
+                    src={item.url}
+                    alt={item.title}
+                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                  />
+                  <div className="absolute top-3 left-3">
+                    <span className="bg-amber-700/90 text-white px-3 py-1 text-xs rounded-full backdrop-blur-sm font-medium">
+                      {item.category}
+                    </span>
+                  </div>
+                </div>
+                <div className="p-4 md:p-6">
+                  <h3 className="font-bold text-base md:text-lg text-slate-800 mb-1">{item.title}</h3>
+                  {item.description && <p className="text-sm text-slate-500 line-clamp-2">{item.description}</p>}
+                </div>
               </div>
-            </div>
-            <div className="p-4 md:p-6">
-              <h3 className="font-bold text-base md:text-lg text-slate-800 mb-1">{item.title}</h3>
-              {item.description && <p className="text-sm text-slate-500 line-clamp-2">{item.description}</p>}
-            </div>
+            ))}
           </div>
-        ))}
-      </div>
 
-      {filteredItems.length === 0 && (
-        <div className="text-center py-20 text-slate-400">
-          V této kategorii zatím nejsou žádné fotografie.
-        </div>
+          {filteredItems.length === 0 && !isLoading && (
+            <div className="text-center py-20 text-slate-400">
+              V této kategorii zatím nejsou žádné fotografie.
+            </div>
+          )}
+        </>
       )}
 
-      {/* Lightbox Modal */}
       {lightboxOpen && filteredItems.length > 0 && (
         <div 
           className="fixed inset-0 bg-black/95 z-50 flex items-center justify-center"
@@ -146,7 +152,6 @@ const Gallery: React.FC = () => {
           onTouchMove={handleTouchMove}
           onTouchEnd={handleTouchEnd}
         >
-          {/* Close button */}
           <button
             onClick={closeLightbox}
             className="absolute top-4 right-4 text-white hover:text-amber-500 transition-colors z-10 p-2"
@@ -157,12 +162,10 @@ const Gallery: React.FC = () => {
             </svg>
           </button>
 
-          {/* Image counter - mobile friendly */}
           <div className="absolute top-4 left-4 text-white text-sm md:text-base font-medium bg-black/50 px-3 py-1 rounded-full backdrop-blur-sm">
             {currentIndex + 1} / {filteredItems.length}
           </div>
 
-          {/* Previous button - visible on all devices when multiple images */}
           {filteredItems.length > 1 && (
             <button
               onClick={(e) => {
@@ -178,7 +181,6 @@ const Gallery: React.FC = () => {
             </button>
           )}
 
-          {/* Next button - visible on all devices when multiple images */}
           {filteredItems.length > 1 && (
             <button
               onClick={(e) => {
@@ -194,7 +196,6 @@ const Gallery: React.FC = () => {
             </button>
           )}
 
-          {/* Main image container */}
           <div className="relative w-full h-full flex flex-col items-center justify-center p-4 md:p-8">
             <img
               src={filteredItems[currentIndex].url}
@@ -202,7 +203,6 @@ const Gallery: React.FC = () => {
               className="max-w-full max-h-[70vh] md:max-h-[80vh] object-contain rounded-lg"
             />
             
-            {/* Image info - below image on mobile, overlay on desktop */}
             <div className="mt-4 md:absolute md:bottom-8 md:left-1/2 md:-translate-x-1/2 bg-black/70 backdrop-blur-md rounded-xl px-6 py-4 max-w-2xl w-full md:w-auto">
               <div className="flex items-center gap-3 mb-2">
                 <span className="bg-amber-700 text-white px-3 py-1 text-xs md:text-sm rounded-full font-medium">
@@ -219,7 +219,6 @@ const Gallery: React.FC = () => {
               )}
             </div>
 
-            {/* Mobile swipe indicator - shown only on mobile */}
             {filteredItems.length > 1 && (
               <div className="md:hidden absolute bottom-4 left-1/2 -translate-x-1/2 text-white/60 text-xs flex items-center gap-2">
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

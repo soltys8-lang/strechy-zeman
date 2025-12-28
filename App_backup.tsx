@@ -86,9 +86,9 @@ const Contact: React.FC = () => (
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                 </svg>
               </div>
-              <div className="text-left min-w-0 flex-1">
-                <h4 className="font-bold mb-1 text-sm">Adresa</h4>
-                <p className="text-slate-400 text-[11px] leading-relaxed xs:text-xs sm:text-base">{CONTACT_INFO.address}</p>
+              <div className="text-left">
+                <h4 className="font-bold mb-1">Adresa</h4>
+                <p className="text-slate-400">{CONTACT_INFO.address}</p>
               </div>
             </div>
             
@@ -98,9 +98,9 @@ const Contact: React.FC = () => (
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
                 </svg>
               </div>
-              <div className="text-left min-w-0 flex-1">
-                <h4 className="font-bold mb-1 text-sm">Telefon</h4>
-                <a href={`tel:${CONTACT_INFO.phone.replace(/\s/g, '')}`} className="text-slate-400 hover:text-amber-500 transition-colors text-xs sm:text-base whitespace-nowrap">{CONTACT_INFO.phone}</a>
+              <div className="text-left">
+                <h4 className="font-bold mb-1">Telefon</h4>
+                <a href={`tel:${CONTACT_INFO.phone.replace(/\s/g, '')}`} className="text-slate-400 hover:text-amber-500 transition-colors">{CONTACT_INFO.phone}</a>
               </div>
             </div>
 
@@ -110,9 +110,9 @@ const Contact: React.FC = () => (
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                 </svg>
               </div>
-              <div className="text-left min-w-0 flex-1">
-                <h4 className="font-bold mb-1 text-sm">E-mail</h4>
-                <a href={`mailto:${CONTACT_INFO.email}`} className="text-slate-400 hover:text-amber-500 transition-colors break-words text-[11px] leading-relaxed xs:text-xs sm:text-base">{CONTACT_INFO.email}</a>
+              <div className="text-left">
+                <h4 className="font-bold mb-1">E-mail</h4>
+                <a href={`mailto:${CONTACT_INFO.email}`} className="text-slate-400 hover:text-amber-500 transition-colors break-all">{CONTACT_INFO.email}</a>
               </div>
             </div>
           </div>

@@ -1,0 +1,7 @@
+{
+  "name": "Střechy Zeman - Tesařství a Pokrývačství",
+  "description": "Profesionální webová prezentace pro tesaře a pokrývače s integrovaným redakčním systémem pro správu galerie.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}

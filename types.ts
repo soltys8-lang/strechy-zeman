@@ -1,4 +1,3 @@
-
 export enum Category {
   PLECHOVA = 'Plechová',
   SINDEL = 'Šindel',
@@ -13,6 +12,7 @@ export interface GalleryItem {
   title: string;
   description?: string;
   date: number;
+  storageId?: string;
 }
 
 export interface NavItem {

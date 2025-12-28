@@ -62,10 +62,10 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
     }
   };
 
-  const handleDelete = async (firestoreId: string, storageId: string) => {
+  const handleDelete = async (firestoreId: string, storageId?: string) => {
     if (confirm('Opravdu chcete tuto fotografii smazat?')) {
       try {
-        await storage.removeItem(firestoreId, storageId);
+        await storage.removeItem(firestoreId, storageId || firestoreId);
         await loadGallery();
         alert('Fotografie byla smazána');
       } catch (error) {
@@ -167,7 +167,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
                   <p className="text-xs text-slate-500">{item.category}</p>
                 </div>
                 <button
-                  onClick={() => handleDelete(item.id, item.id)}
+                  onClick={() => handleDelete(item.id, item.storageId)}
                   className="p-2 text-rose-500 hover:bg-rose-50 rounded-lg transition-colors"
                   title="Smazat"
                 >

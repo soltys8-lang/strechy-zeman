@@ -27,15 +27,18 @@ export const storage = {
   // Add new item with Firebase upload
   addItem: async (item: Omit<GalleryItem, 'url'>, file: File): Promise<GalleryItem> => {
     try {
+      const storageId = item.id; // This is the storage filename
+      
       // Upload to Firebase Storage
-      const storageRef = ref(firebaseStorage, `gallery/${item.id}`);
+      const storageRef = ref(firebaseStorage, `gallery/${storageId}`);
       await uploadBytes(storageRef, file);
       const url = await getDownloadURL(storageRef);
       
-      // Save metadata to Firestore
-      const fullItem: Omit<GalleryItem, 'id'> = { 
-        ...item, 
-        url 
+      // Save metadata to Firestore (including storageId)
+      const fullItem = { 
+        ...item,
+        url,
+        storageId // Save storage ID for later deletion
       };
       
       const docRef = await addDoc(collection(db, GALLERY_COLLECTION), fullItem);

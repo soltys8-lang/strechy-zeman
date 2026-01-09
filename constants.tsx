@@ -34,6 +34,6 @@ export const INITIAL_GALLERY: GalleryItem[] = [
 export const CONTACT_INFO = {
   name: 'Zdeněk Zeman',
   address: 'Křižanovice 273, 685 01 Křižanovice',
-  phone: '+420 602 812 440',
+  phone: '+420 728 349 241',
   email: 'strechynakliczeman@gmail.com',
 };

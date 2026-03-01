@@ -1,6 +1,6 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://strechy-zeman.vercel.app/sitemap.xml
+Sitemap: https://strechynakliczeman.cz/sitemap.xml
 
 Crawl-delay: 10

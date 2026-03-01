@@ -6,7 +6,7 @@ import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import Gallery from './components/Gallery';
 import AdminPanel from './components/AdminPanel';
-import { CONTACT_INFO } from './constants';
+import { CONTACT_INFO } from './constants.tsx';
 
 const Home: React.FC = () => (
   <>

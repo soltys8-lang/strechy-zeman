@@ -1,9 +1,0 @@
-{
-  "redirects": [
-    {
-      "source": "/:path*",
-      "destination": "https://strechynakliczeman.cz/:path*",
-      "permanent": true
-    }
-  ]
-}

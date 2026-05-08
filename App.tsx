@@ -13,7 +13,7 @@ const Home: React.FC = () => (
     {/* Hero Section */}
     <div className="relative h-[80vh] flex items-center justify-center overflow-hidden">
       <img
-        src="/images/bg-foto.jpg"
+        src="/images/bg-foto.webp"
         alt="Krásná střecha"
         className="absolute inset-0 w-full h-full object-cover"
       />

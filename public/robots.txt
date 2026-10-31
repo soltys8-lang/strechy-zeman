@@ -2,5 +2,3 @@ User-agent: *
 Allow: /
 
 Sitemap: https://strechynakliczeman.cz/sitemap.xml
-
-Crawl-delay: 10

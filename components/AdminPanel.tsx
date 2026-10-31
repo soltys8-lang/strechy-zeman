@@ -80,7 +80,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
       if (onLogout) {
         onLogout();
       } else {
-        window.location.hash = '#/';
+        window.location.href = '/';
       }
     }
   };

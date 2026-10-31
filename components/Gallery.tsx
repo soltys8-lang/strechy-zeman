@@ -1,24 +1,53 @@
 import React, { useState, useEffect } from 'react';
 import { Category, GalleryItem } from '../types';
-import { storage } from '../services/storage';
 
-const Gallery: React.FC = () => {
-  const [items, setItems] = useState<GalleryItem[]>([]);
+interface GalleryProps {
+  initialItems?: GalleryItem[];
+}
+
+// Ve zvětšení hned ukáže náhled, originál přepne až po stažení
+const LightboxImage: React.FC<{ item: GalleryItem }> = ({ item }) => {
+  const [src, setSrc] = useState(item.thumb ?? item.url);
+
+  useEffect(() => {
+    const original = new Image();
+    original.onload = () => setSrc(item.url);
+    original.src = item.url;
+    return () => {
+      original.onload = null;
+    };
+  }, [item.url]);
+
+  return (
+    <img
+      src={src}
+      alt={item.title}
+      className="max-w-full max-h-[70vh] md:max-h-[80vh] object-contain rounded-lg"
+    />
+  );
+};
+
+const Gallery: React.FC<GalleryProps> = ({ initialItems = [] }) => {
+  const [items, setItems] = useState<GalleryItem[]>(initialItems);
   const [filter, setFilter] = useState<Category | 'Vše'>('Vše');
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [touchStart, setTouchStart] = useState(0);
   const [touchEnd, setTouchEnd] = useState(0);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(initialItems.length === 0);
 
   useEffect(() => {
     loadGallery();
   }, []);
 
+  // Předgenerované fotky se nahradí aktuálními z Firebase
   const loadGallery = async () => {
-    setIsLoading(true);
+    const { storage } = await import('../services/storage');
     const galleryItems = await storage.getGallery();
-    setItems(galleryItems);
+    if (galleryItems.length > 0) {
+      const thumbs = new Map(initialItems.map(({ id, thumb }) => [id, thumb]));
+      setItems(galleryItems.map((item) => ({ ...item, thumb: thumbs.get(item.id) })));
+    }
     setIsLoading(false);
   };
 
@@ -26,7 +55,7 @@ const Gallery: React.FC = () => {
     ? items 
     : items.filter(item => item.category === filter);
 
-  const categories = ['Vše', ...Object.values(Category)];
+  const categories = ['Vše', ...Object.values(Category).filter(cat => items.some(item => item.category === cat))];
 
   const openLightbox = (index: number) => {
     setCurrentIndex(index);
@@ -84,7 +113,7 @@ const Gallery: React.FC = () => {
   return (
     <div className="max-w-7xl mx-auto px-4 py-16">
       <div className="text-center mb-12">
-        <h2 className="text-4xl font-bold text-slate-900 mb-4">Naše realizace</h2>
+        <h1 className="text-4xl font-bold text-slate-900 mb-4">Naše realizace</h1>
         <div className="w-20 h-1 bg-amber-600 mx-auto"></div>
       </div>
 
@@ -94,7 +123,7 @@ const Gallery: React.FC = () => {
             <button
               key={cat}
               onClick={() => setFilter(cat as any)}
-              className={`px-6 py-2 rounded-full text-sm font-medium transition-all whitespace-nowrap ${
+              className={`px-6 py-3 rounded-full text-sm font-medium transition-all whitespace-nowrap ${
                 filter === cat
                   ? 'bg-amber-700 text-white shadow-lg'
                   : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'
@@ -117,10 +146,11 @@ const Gallery: React.FC = () => {
                 className="group bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 cursor-pointer active:scale-95"
                 onClick={() => openLightbox(index)}
               >
-                <div className="relative aspect-[4/3] overflow-hidden">
+                <div className="relative aspect-[4/3] overflow-hidden bg-slate-200">
                   <img
-                    src={item.url}
-                    alt={item.title}
+                    src={item.thumb ?? item.url}
+                    alt={`${item.title}, krytina: ${item.category.toLowerCase()}`}
+                    loading="lazy"
                     className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                   />
                   <div className="absolute top-3 left-3">
@@ -154,7 +184,7 @@ const Gallery: React.FC = () => {
         >
           <button
             onClick={closeLightbox}
-            className="absolute top-4 right-4 text-white hover:text-amber-500 transition-colors z-10 p-2"
+            className="absolute top-4 right-4 text-white hover:text-amber-500 transition-colors z-10 p-3"
             aria-label="Zavřít"
           >
             <svg className="w-7 h-7 md:w-8 md:h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -172,7 +202,7 @@ const Gallery: React.FC = () => {
                 e.stopPropagation();
                 prevImage();
               }}
-              className="absolute left-2 md:left-4 top-1/2 -translate-y-1/2 text-white hover:text-amber-500 transition-colors bg-black/50 hover:bg-black/70 rounded-full p-2 md:p-3 cursor-pointer z-20"
+              className="absolute left-2 md:left-4 top-1/2 -translate-y-1/2 text-white hover:text-amber-500 transition-colors bg-black/50 hover:bg-black/70 rounded-full p-3 cursor-pointer z-20"
               aria-label="Předchozí"
             >
               <svg className="w-6 h-6 md:w-8 md:h-8 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -187,7 +217,7 @@ const Gallery: React.FC = () => {
                 e.stopPropagation();
                 nextImage();
               }}
-              className="absolute right-2 md:right-4 top-1/2 -translate-y-1/2 text-white hover:text-amber-500 transition-colors bg-black/50 hover:bg-black/70 rounded-full p-2 md:p-3 cursor-pointer z-20"
+              className="absolute right-2 md:right-4 top-1/2 -translate-y-1/2 text-white hover:text-amber-500 transition-colors bg-black/50 hover:bg-black/70 rounded-full p-3 cursor-pointer z-20"
               aria-label="Další"
             >
               <svg className="w-6 h-6 md:w-8 md:h-8 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -196,13 +226,14 @@ const Gallery: React.FC = () => {
             </button>
           )}
 
-          <div className="relative w-full h-full flex flex-col items-center justify-center p-4 md:p-8">
-            <img
-              src={filteredItems[currentIndex].url}
-              alt={filteredItems[currentIndex].title}
-              className="max-w-full max-h-[70vh] md:max-h-[80vh] object-contain rounded-lg"
-            />
-            
+          <div
+            className="relative w-full h-full flex flex-col items-center justify-center p-4 md:p-8"
+            onClick={(e) => {
+              if (e.target === e.currentTarget) closeLightbox();
+            }}
+          >
+            <LightboxImage key={filteredItems[currentIndex].id} item={filteredItems[currentIndex]} />
+
             <div className="mt-4 md:absolute md:bottom-8 md:left-1/2 md:-translate-x-1/2 bg-black/70 backdrop-blur-md rounded-xl px-6 py-4 max-w-2xl w-full md:w-auto">
               <div className="flex items-center gap-3 mb-2">
                 <span className="bg-amber-700 text-white px-3 py-1 text-xs md:text-sm rounded-full font-medium">
@@ -220,7 +251,7 @@ const Gallery: React.FC = () => {
             </div>
 
             {filteredItems.length > 1 && (
-              <div className="md:hidden absolute bottom-4 left-1/2 -translate-x-1/2 text-white/60 text-xs flex items-center gap-2">
+              <div className="md:hidden landscape:hidden absolute bottom-4 left-1/2 -translate-x-1/2 text-white/60 text-xs flex items-center gap-2">
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" />
                 </svg>

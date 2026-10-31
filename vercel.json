@@ -1,0 +1,13 @@
+{
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist",
+  "trailingSlash": false,
+  "redirects": [
+    {
+      "source": "/:path*",
+      "has": [{ "type": "host", "value": "www.strechynakliczeman.cz" }],
+      "destination": "https://strechynakliczeman.cz/:path*",
+      "permanent": true
+    }
+  ]
+}

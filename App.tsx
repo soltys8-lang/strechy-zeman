@@ -1,36 +1,41 @@
 
-import React, { useState, useEffect } from 'react';
-import { signInWithEmailAndPassword, signOut, onAuthStateChanged } from 'firebase/auth';
-import { auth } from './firebase';
+import React from 'react';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import Gallery from './components/Gallery';
-import AdminPanel from './components/AdminPanel';
-import { CONTACT_INFO } from './constants';
+import AdminRoute from './components/AdminRoute';
+import AreaChips from './components/AreaChips';
+import CityPage from './components/CityPage';
+import ServiceCards from './components/ServiceCards';
+import ServiceDetail from './components/ServiceDetail';
+import { CONTACT_INFO, PHONE_HREF } from './constants';
+import { CITIES, SERVICES } from './content';
+import { GalleryItem } from './types';
 
 const Home: React.FC = () => (
   <>
     {/* Hero Section */}
-    <div className="relative h-[80vh] flex items-center justify-center overflow-hidden">
+    <div className="relative min-h-[80vh] py-12 flex items-center justify-center overflow-hidden">
       <img
         src="/images/bg-foto.webp"
-        alt="Krásná střecha"
+        alt="Střecha rodinného domu s plechovou krytinou a střešními okny"
+        fetchPriority="high"
         className="absolute inset-0 w-full h-full object-cover"
       />
       <div className="absolute inset-0 bg-black/40"></div>
       <div className="relative z-10 text-center px-4 max-w-4xl">
-        <h1 className="text-5xl md:text-7xl text-white font-bold mb-6 drop-shadow-2xl">
+        <h1 className="text-4xl min-[360px]:text-5xl md:text-7xl text-white font-bold mb-6 drop-shadow-2xl">
           Vaše střecha, <br /> naše zodpovědnost
         </h1>
         <p className="text-xl text-white/90 mb-10 max-w-2xl mx-auto drop-shadow-lg font-light">
-          Realizujeme poctivé tesařské a pokrývačské práce v Křižanovicích a okolí. 
+          Realizujeme poctivé tesařské a pokrývačské práce v Křižanovicích, v Brně a v celém Jihomoravském kraji.
           Střechy, které vydrží generace.
         </p>
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
-          <a href="#/kontakt" className="px-10 py-4 bg-amber-700 text-white font-bold rounded-full hover:bg-amber-800 transition-all shadow-xl hover:scale-105">
+          <a href="/kontakt" className="px-10 py-4 bg-amber-700 text-white font-bold rounded-full hover:bg-amber-800 transition-all shadow-xl hover:scale-105">
             Mám zájem o kalkulaci
           </a>
-          <a href="#/galerie" className="px-10 py-4 bg-white/10 backdrop-blur-md text-white border border-white/30 font-bold rounded-full hover:bg-white/20 transition-all">
+          <a href="/galerie" className="px-10 py-4 bg-white/10 backdrop-blur-md text-white border border-white/30 font-bold rounded-full hover:bg-white/20 transition-all">
             Prohlédnout práce
           </a>
         </div>
@@ -43,7 +48,7 @@ const Home: React.FC = () => (
         <div>
           <h2 className="text-4xl font-bold text-slate-900 mb-6">Tradiční řemeslo s moderním přístupem</h2>
           <p className="text-slate-600 mb-6 leading-relaxed">
-            Jmenuji se Zdeněk Zeman a v oboru tesařství a pokrývačství se pohybuji již řadu let. 
+            Jmenuji se Zdeněk Zeman a v oboru tesařství a pokrývačství se pohybuji již řadu let.
             Mým cílem je dodávat stavby, které nejen skvěle vypadají, ale především stoprocentně plní svou funkci.
           </p>
           <ul className="space-y-4">
@@ -58,25 +63,73 @@ const Home: React.FC = () => (
           </ul>
         </div>
         <div className="grid grid-cols-2 gap-4">
-          <img src="/images/krovy.jpg" className="rounded-lg shadow-md" alt="Detail práce" />
-          <img src="/images/man-working-roof.jpg" className="rounded-lg shadow-md mt-8" alt="Detail práce 2" />
+          <img src="/images/krovy.webp" width={1000} height={666} loading="lazy" className="rounded-lg shadow-md h-auto" alt="Dřevěný krov střechy" />
+          <img src="/images/man-working-roof.webp" width={1000} height={563} loading="lazy" className="rounded-lg shadow-md mt-8 h-auto" alt="Pokrývač při práci na střeše" />
         </div>
+      </div>
+    </section>
+
+    {/* Services */}
+    <section className="py-24 bg-slate-50">
+      <div className="max-w-5xl mx-auto px-4">
+        <div className="text-center mb-12">
+          <h2 className="text-4xl font-bold text-slate-900 mb-4">Pokrývačské a tesařské služby</h2>
+          <div className="w-20 h-1 bg-amber-600 mx-auto"></div>
+        </div>
+        <ServiceCards />
+      </div>
+    </section>
+
+    {/* Service Area */}
+    <section className="py-24 bg-white">
+      <div className="max-w-3xl mx-auto px-4 text-center">
+        <h2 className="text-4xl font-bold text-slate-900 mb-6">Pokrývač pro Brno, Vyškovsko a celý Jihomoravský kraj</h2>
+        <p className="text-slate-600 mb-8 leading-relaxed">
+          Sídlíme v Křižanovicích. Střechy stavíme, opravujeme a rekonstruujeme po celém Jihomoravském kraji, například v těchto městech a obcích:
+        </p>
+        <AreaChips className="justify-center mb-10" />
+        <a href={PHONE_HREF} className="inline-block px-10 py-4 bg-amber-700 text-white font-bold rounded-full hover:bg-amber-800 transition-all shadow-xl">
+          Zavolat {CONTACT_INFO.phone}
+        </a>
       </div>
     </section>
   </>
 );
 
+const Services: React.FC = () => (
+  <div className="max-w-5xl mx-auto px-4 py-16">
+    <div className="text-center mb-12">
+      <h1 className="text-4xl font-bold text-slate-900 mb-4">Naše služby</h1>
+      <div className="w-20 h-1 bg-amber-600 mx-auto mb-6"></div>
+      <p className="text-slate-600 max-w-2xl mx-auto leading-relaxed">
+        Stavíme, opravujeme a rekonstruujeme střechy z tašek, šindele i plechu. Působíme v Brně, na Vyškovsku a v celém Jihomoravském kraji.
+      </p>
+    </div>
+    <ServiceCards />
+  </div>
+);
+
+const NotFound: React.FC = () => (
+  <div className="min-h-[60vh] flex flex-col items-center justify-center px-4 text-center">
+    <h1 className="text-4xl font-bold text-slate-900 mb-4">Stránka nenalezena</h1>
+    <p className="text-slate-600 mb-8">Tato stránka neexistuje nebo byla přesunuta.</p>
+    <a href="/" className="px-10 py-4 bg-amber-700 text-white font-bold rounded-full hover:bg-amber-800 transition-all">
+      Zpět na úvod
+    </a>
+  </div>
+);
+
 const Contact: React.FC = () => (
   <div className="min-h-[70vh] flex items-center justify-center px-4 py-20">
     <div className="max-w-2xl w-full">
-      <div className="bg-slate-900 text-white rounded-3xl shadow-2xl p-12 md:p-16">
+      <div className="bg-slate-900 text-white rounded-3xl shadow-2xl px-6 py-12 md:p-16">
         <div className="text-center mb-12">
-          <h2 className="text-4xl font-bold mb-4">Kontaktujte nás</h2>
+          <h1 className="text-4xl font-bold mb-4">Kontaktujte nás</h1>
           <p className="text-slate-400 max-w-md mx-auto">
             Máte dotaz nebo zájem o nezávaznou cenovou nabídku? Neváhejte nám zavolat nebo napsat.
           </p>
         </div>
-        
+
         <div className="flex justify-center">
           <div className="space-y-8">
             <div className="flex items-start">
@@ -88,10 +141,10 @@ const Contact: React.FC = () => (
               </div>
               <div className="text-left min-w-0 flex-1">
                 <h4 className="font-bold mb-1 text-sm">Adresa</h4>
-                <p className="text-slate-400 text-[11px] leading-relaxed xs:text-xs sm:text-base">{CONTACT_INFO.address}</p>
+                <p className="text-slate-400 text-base leading-relaxed">{CONTACT_INFO.address}</p>
               </div>
             </div>
-            
+
             <div className="flex items-start">
               <div className="bg-amber-700/20 p-3 rounded-xl mr-5 flex-shrink-0">
                 <svg className="w-6 h-6 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -100,7 +153,7 @@ const Contact: React.FC = () => (
               </div>
               <div className="text-left min-w-0 flex-1">
                 <h4 className="font-bold mb-1 text-sm">Telefon</h4>
-                <a href={`tel:${CONTACT_INFO.phone.replace(/\s/g, '')}`} className="text-slate-400 hover:text-amber-500 transition-colors text-xs sm:text-base whitespace-nowrap">{CONTACT_INFO.phone}</a>
+                <a href={PHONE_HREF} className="inline-flex items-center min-h-[44px] text-slate-300 font-bold hover:text-amber-500 transition-colors text-lg whitespace-nowrap">{CONTACT_INFO.phone}</a>
               </div>
             </div>
 
@@ -112,7 +165,7 @@ const Contact: React.FC = () => (
               </div>
               <div className="text-left min-w-0 flex-1">
                 <h4 className="font-bold mb-1 text-sm">E-mail</h4>
-                <a href={`mailto:${CONTACT_INFO.email}`} className="text-slate-400 hover:text-amber-500 transition-colors break-words text-[11px] leading-relaxed xs:text-xs sm:text-base">{CONTACT_INFO.email}</a>
+                <a href={`mailto:${CONTACT_INFO.email}`} className="inline-flex items-center min-h-[44px] text-slate-300 hover:text-amber-500 transition-colors break-all text-sm sm:text-base">{CONTACT_INFO.email}</a>
               </div>
             </div>
           </div>
@@ -122,106 +175,36 @@ const Contact: React.FC = () => (
   </div>
 );
 
-const App: React.FC = () => {
-  const [route, setRoute] = useState(window.location.hash || '#/');
-  const [isAdminLoggedIn, setIsAdminLoggedIn] = useState(false);
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [isLoading, setIsLoading] = useState(true);
+interface AppProps {
+  path: string;
+  gallery?: GalleryItem[];
+}
 
-  useEffect(() => {
-    const handleHashChange = () => setRoute(window.location.hash || '#/');
-    window.addEventListener('hashchange', handleHashChange);
-    return () => window.removeEventListener('hashchange', handleHashChange);
-  }, []);
-
-  // Listen for auth state changes
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      setIsAdminLoggedIn(!!user);
-      setIsLoading(false);
-    });
-    return () => unsubscribe();
-  }, []);
-
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
-    
-    try {
-      await signInWithEmailAndPassword(auth, email, password);
-      setEmail('');
-      setPassword('');
-    } catch (error: any) {
-      console.error('Login error:', error);
-      if (error.code === 'auth/invalid-credential') {
-        alert('Nesprávný email nebo heslo!');
-      } else {
-        alert('Chyba při přihlašování. Zkuste to znovu.');
-      }
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleLogout = async () => {
-    try {
-      await signOut(auth);
-    } catch (error) {
-      console.error('Logout error:', error);
-    }
-  };
-
+const App: React.FC<AppProps> = ({ path, gallery }) => {
   const renderContent = () => {
-    switch (route) {
-      case '#/galerie':
-        return <Gallery />;
-      case '#/kontakt':
-        return <Contact />;
-      case '#/admin':
-        if (!isAdminLoggedIn) {
-          return (
-            <div className="min-h-[60vh] flex items-center justify-center px-4">
-              <div className="max-w-md w-full bg-white p-8 rounded-2xl shadow-xl border border-slate-100">
-                <h2 className="text-2xl font-bold text-center mb-6">Přihlášení do administrace</h2>
-                <form onSubmit={handleLogin} className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-1">Email</label>
-                    <input
-                      type="email"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-amber-500 outline-none"
-                      placeholder="admin@zeman-strechy.cz"
-                      required
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-1">Heslo</label>
-                    <input
-                      type="password"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-amber-500 outline-none"
-                      placeholder="Zadejte heslo"
-                      required
-                    />
-                  </div>
-                  <button 
-                    type="submit" 
-                    disabled={isLoading}
-                    className="w-full py-3 bg-slate-800 text-white font-bold rounded-lg hover:bg-slate-700 transition-colors disabled:opacity-50"
-                  >
-                    {isLoading ? 'Přihlašuji...' : 'Přihlásit se'}
-                  </button>
-                </form>
-              </div>
-            </div>
-          );
-        }
-        return <AdminPanel onLogout={handleLogout} />;
-      default:
+    const service = SERVICES.find(({ slug }) => path === `/sluzby/${slug}`);
+    if (service?.detail) {
+      return <ServiceDetail service={service} detail={service.detail} />;
+    }
+
+    const city = CITIES.find(({ slug }) => path === `/${slug}`);
+    if (city) {
+      return <CityPage city={city} photos={gallery ?? []} />;
+    }
+
+    switch (path) {
+      case '/':
         return <Home />;
+      case '/sluzby':
+        return <Services />;
+      case '/galerie':
+        return <Gallery initialItems={gallery} />;
+      case '/kontakt':
+        return <Contact />;
+      case '/admin':
+        return <AdminRoute />;
+      default:
+        return <NotFound />;
     }
   };
 

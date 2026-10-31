@@ -1,9 +1,9 @@
 import React from 'react';
-import { CONTACT_INFO } from '../constants';
+import { CONTACT_INFO, PHONE_HREF } from '../constants';
 
 const Footer: React.FC = () => {
   return (
-    <footer className="bg-slate-900 text-slate-300 py-12 px-4">
+    <footer className="bg-slate-900 text-slate-300 border-t border-slate-800 py-12 px-4">
       <div className="max-w-4xl mx-auto">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-12 text-center md:text-left">
           <div>
@@ -15,21 +15,25 @@ const Footer: React.FC = () => {
           <div>
             <h3 className="text-white text-lg font-bold mb-4">Kontakt</h3>
             <p className="text-sm mb-2">{CONTACT_INFO.address}</p>
-            <p className="text-sm mb-2">Tel: <a href={`tel:${CONTACT_INFO.phone.replace(/\s/g, '')}`} className="hover:text-amber-500 transition-colors">{CONTACT_INFO.phone}</a></p>
-            <p className="text-sm">E-mail: <a href={`mailto:${CONTACT_INFO.email}`} className="hover:text-amber-500 transition-colors break-all">{CONTACT_INFO.email}</a></p>
+            <p className="text-sm md:mb-2">Tel: <a href={PHONE_HREF} className="inline-block py-3 md:py-0 hover:text-amber-500 transition-colors">{CONTACT_INFO.phone}</a></p>
+            <p className="text-sm">E-mail: <a href={`mailto:${CONTACT_INFO.email}`} className="inline-block py-3 md:py-0 hover:text-amber-500 transition-colors break-all">{CONTACT_INFO.email}</a></p>
           </div>
           <div>
             <h3 className="text-white text-lg font-bold mb-4">Navigace</h3>
-            <ul className="text-sm space-y-2">
-              <li><a href="#/" className="hover:text-amber-500 transition-colors">Domů</a></li>
-              <li><a href="#/galerie" className="hover:text-amber-500 transition-colors">Galerie prací</a></li>
-              <li><a href="#/kontakt" className="hover:text-amber-500 transition-colors">Kontaktujte nás</a></li>
+            <ul className="text-sm md:space-y-2">
+              <li><a href="/" className="block py-3 md:py-0 hover:text-amber-500 transition-colors">Domů</a></li>
+              <li><a href="/sluzby" className="block py-3 md:py-0 hover:text-amber-500 transition-colors">Služby</a></li>
+              <li><a href="/galerie" className="block py-3 md:py-0 hover:text-amber-500 transition-colors">Galerie prací</a></li>
+              <li><a href="/kontakt" className="block py-3 md:py-0 hover:text-amber-500 transition-colors">Kontaktujte nás</a></li>
             </ul>
           </div>
         </div>
       </div>
-      <div className="max-w-4xl mx-auto mt-12 pt-8 border-t border-slate-800 text-center text-xs text-slate-500">
-        &copy; {new Date().getFullYear()} Střechy Zeman. Všechna práva vyhrazena.
+      <div className="max-w-4xl mx-auto mt-12 pt-8 border-t border-slate-800 text-center text-xs text-slate-400">
+        <p suppressHydrationWarning>&copy; {new Date().getFullYear()} Střechy Zeman. Všechna práva vyhrazena.</p>
+        <p className="mt-2">
+          {CONTACT_INFO.name}, IČO {CONTACT_INFO.ico} · <a href="/admin" className="inline-block py-3.5 md:py-0 hover:text-amber-500 transition-colors">Administrace</a>
+        </p>
       </div>
     </footer>
   );
